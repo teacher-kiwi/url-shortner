@@ -22,6 +22,11 @@ if (!ADMIN_PASSWORD) {
   console.error('ADMIN_PASSWORD 환경 변수가 필요합니다 (.env.example 참고).');
   process.exit(1);
 }
+// 공개 저장소의 예시 비밀번호를 그대로 쓰거나 너무 짧으면 시작하지 않는다.
+if (ADMIN_PASSWORD === 'change-me' || ADMIN_PASSWORD.length < 8) {
+  console.error('ADMIN_PASSWORD 를 예시값이 아닌 8자 이상으로 바꿔주세요.');
+  process.exit(1);
+}
 if (!/^https?:\/\/[^/]+$/.test(BASE_URL)) {
   console.error(`BASE_URL 은 https://s.example.com 처럼 경로 없는 주소여야 합니다: ${BASE_URL}`);
   process.exit(1);
@@ -211,12 +216,20 @@ function recordFailure(ip) {
   f.count += 1;
   failures.set(ip, f);
 }
+// 다시 오지 않는 IP 의 기록이 쌓이지 않도록 주기적으로 비운다.
+setInterval(() => {
+  for (const [ip, f] of failures) if (f.reset < Date.now()) failures.delete(ip);
+}, 15 * 60e3).unref();
 
 // ---------------------------------------------------------------- 페이지
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
+
+// 웹 폰트. integrity 로 CDN 의 파일이 바뀌면 불러오지 않는다.
+const FONT_CSS = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css';
+const FONT_CSS_SRI = 'sha384-ei/b2Mz3F5J8nqTvpKS89CkzDCuD7Cc+/F+OsaPUKItzHgLNKnGq3rjtYq/B7RnO';
 
 function page(title, body, { bodyClass = '' } = {}) {
   return `<!doctype html>
@@ -227,7 +240,7 @@ function page(title, body, { bodyClass = '' } = {}) {
 <meta name="robots" content="noindex">
 <title>${esc(title)}</title>
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="${FONT_CSS}" integrity="${FONT_CSS_SRI}" crossorigin="anonymous">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="${bodyClass}">
@@ -274,6 +287,30 @@ const adminHtml = fs.readFileSync(path.join(__dirname, 'views', 'admin.html'), '
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 'loopback, uniquelocal'); // nginx-proxy 가 같은 도커 네트워크에 있다
+
+// 보안 헤더. 스크립트는 우리 서버의 것만, 다른 사이트의 iframe 안에는 뜨지 않게.
+// (통계 막대 높이를 style 속성으로 넣어서 style 은 inline 을 허용한다)
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  'font-src https://cdn.jsdelivr.net',
+  "img-src 'self' data:",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "base-uri 'none'",
+  "object-src 'none'",
+].join('; ');
+
+app.use((req, res, next) => {
+  res.set({
+    'Content-Security-Policy': CSP,
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'same-origin',
+  });
+  next();
+});
 
 app.use('/static', express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
 

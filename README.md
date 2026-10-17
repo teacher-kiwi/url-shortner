@@ -18,7 +18,7 @@ Node 24(내장 `node:sqlite`) + Express, 데이터는 `data/links.db`(SQLite) �
 | 변수 | 필수 | 기본값 | 설명 |
 |---|---|---|---|
 | `BASE_URL` | ✅ | `http://localhost:3000` | 단축 주소 앞부분. 경로·끝 `/` 없이 (예: `https://s.example.com`) |
-| `ADMIN_PASSWORD` | ✅ | — | 관리자 화면(`/admin`) 비밀번호. 바꾸면 기존 로그인이 모두 풀린다 |
+| `ADMIN_PASSWORD` | ✅ | — | 관리자 화면(`/admin`) 비밀번호. 8자 이상 (예시값 `change-me` 는 거부). 바꾸면 기존 로그인이 모두 풀린다 |
 | `SITE_NAME` | | `단축 주소` | 화면 제목·로고 |
 | `TIME_ZONE` | | `Asia/Seoul` | 일별 접속 수·만료일 기준 시간대 (IANA 이름) |
 | `PROXY_NETWORK` | | `proxy` | 리버스 프록시가 붙어 있는 도커 네트워크 (compose 용) |
@@ -29,7 +29,7 @@ Node 24(내장 `node:sqlite`) + Express, 데이터는 `data/links.db`(SQLite) �
 
 ```sh
 npm install
-ADMIN_PASSWORD=test node server.js
+ADMIN_PASSWORD=test-password node server.js
 # http://localhost:3000/admin
 ```
 
