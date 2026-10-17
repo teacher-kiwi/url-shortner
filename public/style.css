@@ -1,0 +1,192 @@
+/* Neo-Brutalism: 두꺼운 검은 테두리, 번지지 않는 그림자, 쨍한 원색 */
+
+:root {
+  --ink: #111;
+  --paper: #fff8e7;
+  --white: #fff;
+  --yellow: #ffde4d;
+  --pink: #ff7eb6;
+  --cyan: #5ce1e6;
+  --lime: #b8ff5c;
+  --orange: #ff9f43;
+  --violet: #b69cff;
+  --red: #ff5c5c;
+  --border: 3px solid var(--ink);
+  --shadow: 5px 5px 0 var(--ink);
+  --shadow-sm: 3px 3px 0 var(--ink);
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(17, 17, 17, .14) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: -0.02em; font-weight: 900; }
+
+a { color: inherit; }
+
+mark {
+  background: var(--yellow);
+  padding: 0 .15em;
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  display: inline-block;
+  transform: rotate(-1.5deg);
+}
+
+/* --- 기본 블록 */
+
+.card {
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.badge {
+  display: inline-block;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .08em;
+  padding: 3px 10px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--cyan);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: var(--white);
+  white-space: nowrap;
+}
+.tag.expired { background: var(--red); color: var(--white); }
+.tag.soon { background: var(--orange); }
+.tag.until { background: var(--lime); }
+
+.btn {
+  font: inherit;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--white);
+  border: var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  padding: 10px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: transform .08s, box-shadow .08s;
+  white-space: nowrap;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--yellow); }
+.btn-pink { background: var(--pink); }
+.btn-cyan { background: var(--cyan); }
+.btn-lime { background: var(--lime); }
+.btn-danger { background: var(--red); color: var(--white); }
+.btn-sm { padding: 6px 10px; font-size: 14px; }
+.btn-block { width: 100%; }
+
+.field { display: flex; flex-direction: column; gap: 6px; font-weight: 800; }
+.field > span { font-size: 14px; }
+.field small { font-weight: 500; color: #555; }
+
+input, textarea {
+  font: inherit;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--white);
+  border: var(--border);
+  border-radius: 8px;
+  padding: 11px 12px;
+  width: 100%;
+  min-width: 0;
+  outline: none;
+}
+input:focus, textarea:focus { background: #fffbe0; box-shadow: var(--shadow-sm); }
+
+.prefix-input {
+  display: flex;
+  border: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--white);
+}
+.prefix-input:focus-within { box-shadow: var(--shadow-sm); }
+.prefix-input .prefix {
+  padding: 11px 10px;
+  background: var(--violet);
+  border-right: var(--border);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.prefix-input input { border: 0; border-radius: 0; box-shadow: none; }
+
+.error {
+  background: var(--red);
+  color: var(--white);
+  border: var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* --- 안내·로그인·오류 페이지 */
+
+.center {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.hero, .message, .login {
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+.hero h1, .message h1, .login h1 { font-size: clamp(34px, 9vw, 52px); }
+.hero p, .message p { margin: 0; font-size: 18px; font-weight: 600; }
+.hero .example {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 18px;
+  background: var(--ink);
+  color: var(--lime);
+  padding: 8px 12px;
+  border-radius: 8px;
+  word-break: break-all;
+}
+.hero .example b { color: var(--yellow); }
+.message.pink { background: var(--pink); }
+.message.yellow { background: var(--yellow); }
+.message .badge { background: var(--white); }
+.login .badge { background: var(--pink); }
+.login .field, .login .error { width: 100%; }

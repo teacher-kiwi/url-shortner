@@ -1,0 +1,39 @@
+# nginx 리버스 프록시 설정 예시. ${DOMAIN} 을 채워서 쓴다(README 참고).
+# 인증서는 Let's Encrypt(webroot 방식)를 가정한다.
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    # Let's Encrypt 인증·갱신용. 리다이렉트보다 먼저 잡아야 한다(^~).
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/acme;
+        access_log off;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+
+    client_max_body_size 64k;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/acme;
+        access_log off;
+    }
+
+    location / {
+        proxy_pass http://url-shortner:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>관리 · {{SITE_NAME}}</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/admin.css">
+</head>
+<body data-host="{{HOST}}" data-time-zone="{{TIME_ZONE}}">
+
+<header class="topbar">
+  <a class="logo" href="/admin">{{SITE_NAME}}<span>관리</span></a>
+  <form method="post" action="/admin/logout">
+    <button class="btn btn-sm" type="submit">로그아웃</button>
+  </form>
+</header>
+
+<main class="wrap">
+
+  <section class="card create">
+    <h2>새 링크 만들기</h2>
+    <form id="create-form" class="create-grid" autocomplete="off">
+      <label class="field span-2">
+        <span>목적지 주소</span>
+        <input name="url" type="text" inputmode="url" placeholder="https://docs.google.com/forms/..." required>
+      </label>
+      <label class="field">
+        <span>단어 <small>비워두면 자동으로 만들어요</small></span>
+        <div class="prefix-input">
+          <span class="prefix">{{HOST}}/</span>
+          <input name="slug" type="text" placeholder="과제1" maxlength="50">
+        </div>
+      </label>
+      <label class="field">
+        <span>메모 <small>선택</small></span>
+        <input name="memo" type="text" placeholder="3학년 2반 수행평가" maxlength="200">
+      </label>
+      <label class="field">
+        <span>만료일 <small>선택 · 그날까지 열려요</small></span>
+        <input name="expires_at" type="date">
+      </label>
+      <div class="field create-submit">
+        <span>&nbsp;</span>
+        <button class="btn btn-primary btn-block" type="submit">만들기 ⚡</button>
+      </div>
+    </form>
+    <p id="create-error" class="error" hidden></p>
+    <div id="create-result" class="create-result" hidden></div>
+  </section>
+
+  <section class="summary">
+    <div class="stat card"><span>링크</span><b id="sum-links">-</b></div>
+    <div class="stat card lime"><span>총 접속</span><b id="sum-clicks">-</b></div>
+    <div class="stat card pink"><span>오늘 접속</span><b id="sum-today">-</b></div>
+  </section>
+
+  <section class="toolbar">
+    <input id="search" type="search" placeholder="🔍 단어·주소·메모 검색">
+    <div class="sort" role="group" aria-label="정렬">
+      <button class="btn btn-sm active" data-sort="created">최신순</button>
+      <button class="btn btn-sm" data-sort="clicks">접속순</button>
+      <button class="btn btn-sm" data-sort="recent">최근 접속순</button>
+    </div>
+  </section>
+
+  <section id="list" class="list"></section>
+  <p id="empty" class="empty card" hidden>아직 만든 링크가 없어요. 위에서 첫 링크를 만들어보세요!</p>
+
+</main>
+
+<!-- QR 크게 보기 -->
+<dialog id="qr-dialog" class="modal qr-modal">
+  <div class="modal-head">
+    <h3>QR 코드</h3>
+    <button class="btn btn-sm" data-close>닫기 ✕</button>
+  </div>
+  <div class="qr-box"><img id="qr-img" alt="QR 코드"></div>
+  <p id="qr-url" class="qr-url"></p>
+  <div class="modal-actions">
+    <button class="btn btn-cyan" id="qr-full">전체 화면</button>
+    <a class="btn btn-lime" id="qr-download">PNG 저장</a>
+  </div>
+</dialog>
+
+<!-- 일별 접속 -->
+<dialog id="stats-dialog" class="modal">
+  <div class="modal-head">
+    <h3 id="stats-title">접속 통계</h3>
+    <button class="btn btn-sm" data-close>닫기 ✕</button>
+  </div>
+  <div class="sort" role="group" aria-label="기간">
+    <button class="btn btn-sm active" data-days="14">14일</button>
+    <button class="btn btn-sm" data-days="30">30일</button>
+    <button class="btn btn-sm" data-days="90">90일</button>
+  </div>
+  <div id="stats-sum" class="stats-sum"></div>
+  <div id="chart" class="chart"></div>
+</dialog>
+
+<!-- 수정 -->
+<dialog id="edit-dialog" class="modal">
+  <div class="modal-head">
+    <h3>링크 수정</h3>
+    <button class="btn btn-sm" data-close>닫기 ✕</button>
+  </div>
+  <form id="edit-form" class="edit-form" autocomplete="off">
+    <label class="field">
+      <span>단어</span>
+      <div class="prefix-input">
+        <span class="prefix">{{HOST}}/</span>
+        <input name="slug" type="text" maxlength="50" required>
+      </div>
+      <small>단어를 바꾸면 예전 주소는 더 이상 열리지 않아요.</small>
+    </label>
+    <label class="field">
+      <span>목적지 주소</span>
+      <input name="url" type="text" inputmode="url" required>
+    </label>
+    <label class="field">
+      <span>메모</span>
+      <input name="memo" type="text" maxlength="200">
+    </label>
+    <label class="field">
+      <span>만료일 <small>비우면 계속 열려요</small></span>
+      <input name="expires_at" type="date">
+    </label>
+    <p id="edit-error" class="error" hidden></p>
+    <button class="btn btn-primary btn-block" type="submit">저장</button>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="/static/admin.js"></script>
+</body>
+</html>
